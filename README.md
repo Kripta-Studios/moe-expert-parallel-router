@@ -75,7 +75,7 @@ Each expert is a SwiGLU MLP, `(silu(x W_g) * (x W_u)) W_d`, with weights stacked
 | `naive` | HF-Mixtral style: `for e in E: torch.where(idx==e)`, then 2 GEMMs | E host syncs plus about 4E launches of tiny GEMMs |
 | `sorted_loop` | permute once, loop over contiguous slices | no masking, but still E small GEMMs |
 | `padded_bmm` | pad each group to the max count, one `bmm` | few launches, but FLOPs wasted on padding (this is what a capacity buffer looks like) |
-| `grouped_mm` | `torch._grouped_mm` (CUTLASS) with `offs` | one variable-size grouped GEMM per projection |
+| `grouped_mm` | `torch._grouped_mm` with `offs` | one fused grouped GEMM per projection on Hopper; on this sm_120 GPU it ran as many per-group GEMMs (section 5.1) |
 | `triton` | our kernel: one launch, row tiles map to experts by binary search over a cumsum of tiles, no host sync | no padding, no syncs |
 
 The Triton kernel sizes its grid by the upper bound `sum_e ceil(c_e/BM) <= ceil(N/BM) + E`, so the host never needs the counts, and surplus programs exit at once. Tiles never cross a group boundary (masked rows), which is the same invariant MegaBlocks and CUTLASS grouped GEMMs keep.
@@ -88,7 +88,7 @@ For one dispatch, one token row is `H * bytes` (DeepSeek-V3 FP8 + one fp32 scale
 - **per-rank dedup** (send once per destination GPU, fan out on arrival): `E[#distinct GPUs hit] * (1-1/EP)` = **7.56**. That is little gain at EP=64, because 8 experts out of 256 rarely share a GPU. With `E=32, k=4, EP=4` the expected saving is 1 − 2.82/4 = **29.5%**, and the gloo run measured **29.7%**.
 - **node-limited** (DeepSeek-V3 + DeepEP): at most 4 nodes per token, IB once per *remote node*, then NVLink forwarding. That gives **3.18** IB copies per token instead of 7.875, a 2.5× cut on the slow link.
 
-Worked example, decode, 128 tokens per GPU: per-slot over IB is 128 × 7.875 × 7392 B = 7.45 MB. At 50 GB/s that takes 149 µs, plus α = 10 µs, so **159 µs**. DeepEP's measured EP64 low-latency dispatch is **173 µs**.
+Worked example, decode, 128 tokens per GPU: per-slot over IB is 128 × 7.875 × 7392 B = 7.45 MB. At 50 GB/s that takes 149 µs, plus α = 10 µs, so **159 µs**. DeepEP's measured EP64 low-latency dispatch is **173 µs** (section 5.4 explains the calibration, which counts all 8 copies and gives 161 µs).
 
 ## 3. Repository map
 
@@ -210,7 +210,7 @@ Setup: 256 experts, top-8, H=7168, I=2048, EP=64 (8 nodes × 8 GPUs), FP8 dispat
 | 4096 | IB, per-slot | 4779 | 9258 | 2431 | 16468 | 14037 |
 | 4096 | IB, node-limited | 1933 | 3739 | 2431 | 8103 | 5672 |
 
-**Calibration:** for 128 tokens at EP=64, the per-slot IB model gives **161 µs** dispatch and **304 µs** combine. DeepEP v1 reports **173 µs** and **314 µs** (implied 43.8 / 46.8 GB/s), so the model is within 7% at this point. This is one calibration point, not a validation across the curve.
+**Calibration:** DeepEP's low-latency kernels send every one of the k=8 copies over RDMA, and its bandwidth figures count all 8. So for the calibration the model counts 8 copies instead of the table's 8 × 63/64 = 7.875 remote copies. At 128 tokens and EP=64 it then gives **161 µs** dispatch and **304 µs** combine (the table's 159 / 299 µs exclude the 1/64 of copies that stay local). DeepEP v1 reports **173 µs** and **314 µs** (implied 43.8 / 46.8 GB/s), so the model is within 7% at this point. This is one calibration point, not a validation across the curve.
 
 ![a2a model](results/a2a_model.png)
 

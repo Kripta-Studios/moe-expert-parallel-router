@@ -14,7 +14,8 @@ Back-ends (all numerically equivalent, they differ only in how work is laid out)
   padded_bmm   pad every group to the largest count and run one batched matmul.
                Few launches, but wastes FLOPs on padding when load is skewed
                (this is what a capacity-factor buffer looks like in memory).
-  grouped_mm   torch._grouped_mm: PyTorch's CUTLASS-backed variable-size grouped GEMM.
+  grouped_mm   torch._grouped_mm: PyTorch's variable-size grouped GEMM (a fused CUTLASS
+               kernel on sm_90; on sm_120 / torch 2.11 the profiler shows one GEMM per group).
   triton       our own grouped GEMM (triton_grouped_gemm.py).
 """
 
