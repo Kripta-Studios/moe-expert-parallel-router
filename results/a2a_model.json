@@ -1,0 +1,94 @@
+{
+  "env": {
+    "python": "3.12.13",
+    "torch": "2.11.0+cu128",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu": "AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD"
+  },
+  "MODELED": true,
+  "setup": {
+    "n_experts": 256,
+    "top_k": 8,
+    "hidden": 7168,
+    "expert_inter": 2048,
+    "ep": 64,
+    "gpus_per_node": 8,
+    "max_nodes": 4,
+    "dispatch_bytes": 1.03125,
+    "combine_bytes": 2.0
+  },
+  "rows_per_token": {
+    "per_slot": 7.875,
+    "per_rank": 7.5558165950236775,
+    "ib_node_limited": 3.175384558872488,
+    "nvl_node_limited": 7.675750191770085
+  },
+  "table": [
+    {
+      "tokens_per_gpu": 128,
+      "scenario": "single_nvlink_domain",
+      "dispatch_us": 21.3,
+      "combine_us": 32.0,
+      "experts_us": 76.0,
+      "layer_serial_us": 129.3,
+      "layer_dbo_us": 76.0
+    },
+    {
+      "tokens_per_gpu": 128,
+      "scenario": "ib_per_slot",
+      "dispatch_us": 159.0,
+      "combine_us": 299.0,
+      "experts_us": 76.0,
+      "layer_serial_us": 534.0,
+      "layer_dbo_us": 458.0
+    },
+    {
+      "tokens_per_gpu": 128,
+      "scenario": "ib_node_limited",
+      "dispatch_us": 70.1,
+      "combine_us": 126.5,
+      "experts_us": 76.0,
+      "layer_serial_us": 272.6,
+      "layer_dbo_us": 196.6
+    },
+    {
+      "tokens_per_gpu": 4096,
+      "scenario": "single_nvlink_domain",
+      "dispatch_us": 373.1,
+      "combine_us": 714.3,
+      "experts_us": 2430.7,
+      "layer_serial_us": 3518.1,
+      "layer_dbo_us": 2430.7
+    },
+    {
+      "tokens_per_gpu": 4096,
+      "scenario": "ib_per_slot",
+      "dispatch_us": 4778.7,
+      "combine_us": 9258.4,
+      "experts_us": 2430.7,
+      "layer_serial_us": 16467.9,
+      "layer_dbo_us": 14037.2
+    },
+    {
+      "tokens_per_gpu": 4096,
+      "scenario": "ib_node_limited",
+      "dispatch_us": 1932.9,
+      "combine_us": 3739.2,
+      "experts_us": 2430.7,
+      "layer_serial_us": 8102.8,
+      "layer_dbo_us": 5672.1
+    }
+  ],
+  "deepep_calibration": {
+    "dispatch": {
+      "deepep_measured_us": 173.0,
+      "model_us_at_50GBps": 161.4,
+      "implied_GBps": 43.8
+    },
+    "combine": {
+      "deepep_measured_us": 314.0,
+      "model_us_at_50GBps": 303.6,
+      "implied_GBps": 46.8
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "env": {
+    "python": "3.12.13",
+    "torch": "2.11.0+cu128",
+    "os": "Windows-11-10.0.26200-SP0",
+    "cpu": "AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD"
+  },
+  "world": 4,
+  "tokens_per_rank": 512,
+  "config": {
+    "hidden": 512,
+    "expert_inter": 256,
+    "n_experts": 32,
+    "top_k": 4,
+    "n_shared": 1,
+    "score_func": "sigmoid",
+    "n_groups": 1,
+    "topk_groups": 1,
+    "norm_topk": true,
+    "routed_scale": 1.0,
+    "bias_update_speed": 0.001,
+    "capacity_factor": null
+  },
+  "correct": true,
+  "rank0_experts": [
+    0,
+    8
+  ],
+  "median_ms_rank0": {
+    "route_permute": 13.556,
+    "dispatch_a2a": 23.763,
+    "experts": 109.576,
+    "combine_a2a": 26.636,
+    "unpermute_shared": 40.187
+  },
+  "dispatch_rows_matrix": [
+    [
+      514,
+      504,
+      536,
+      494
+    ],
+    [
+      478,
+      533,
+      536,
+      501
+    ],
+    [
+      527,
+      557,
+      504,
+      460
+    ],
+    [
+      521,
+      533,
+      485,
+      509
+    ]
+  ],
+  "network_bytes_per_slot": 12558336,
+  "network_bytes_dedup": 8828928,
+  "dedup_saving": 0.297
+}
