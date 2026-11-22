@@ -1,0 +1,14 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+*.ncu-rep
+*.nsys-rep
+*.safetensors
+*.bin
+*.pt
+*.egg-info/
+build/
+dist/

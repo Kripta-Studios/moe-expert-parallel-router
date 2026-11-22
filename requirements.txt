@@ -1,0 +1,9 @@
+# Shared env already provides these; versions used for the results in README.
+torch>=2.8  # tested 2.11.0+cu128
+triton>=3.3  # tested triton-windows 3.5.1 (GPU backend only)
+numpy
+matplotlib
+pytest
+# only for benchmarks/bench_balance.py (hidden-state extraction):
+transformers
+datasets

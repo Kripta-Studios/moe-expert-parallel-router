@@ -1,0 +1,22 @@
+[project]
+name = "moe-ep"
+version = "0.1.0"
+description = "Didactic Mixture-of-Experts layer with top-k gating, grouped GEMM and expert parallelism"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = ["torch>=2.8", "numpy", "matplotlib"]
+
+[project.optional-dependencies]
+gpu = ["triton>=3.3"]
+dev = ["pytest"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
